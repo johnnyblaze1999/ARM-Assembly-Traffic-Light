@@ -1,0 +1,2 @@
+gpio mode [wPi] [Mode] -> to change mode
+gpio write [wPi] [V]   -> to add/remove power
