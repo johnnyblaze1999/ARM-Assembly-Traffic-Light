@@ -34,6 +34,16 @@ main:
 
 	mov r0, #G_PIN
 	bl setPinOutput
+
+	b lp
+
+lp:
+	bl readStopButton
+	cmp r0, #1
+	beq do_while
+
+	b lp
+
 do_while:
 	// red on, green off, g on, r off
 	mov r0, #RED_PIN
@@ -48,42 +58,27 @@ do_while:
 	bl pinOff
 	ldr r0, =#3000
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	// blink g
 	mov r0, #G_PIN
 	bl pinOff
 	ldr r0, =#600
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	mov r0, #G_PIN
 	bl pinOn
 	ldr r0, =#600
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	mov r0, #G_PIN
 	bl pinOff
 	ldr r0, =#600
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	mov r0, #G_PIN
 	bl pinOn
 	ldr r0, =#200
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	// red off, green on, g off, r on
 	mov r0, #RED_PIN
@@ -96,6 +91,8 @@ do_while:
 	bl pinOff
 	ldr r0, =#5000
 	bl delay
+
+	// exit program
 	bl readStopButton
 	cmp r0, #1
 	beq end
@@ -107,37 +104,42 @@ do_while:
 	bl pinOn
 	ldr r0, =#1000
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
-
-	mov r0, #YEL_PIN
-	bl pinOn
-	ldr r0, =#600
-	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	mov r0, #YEL_PIN
 	bl pinOff
 	ldr r0, =#600
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
 
 	mov r0, #YEL_PIN
 	bl pinOn
 	ldr r0, =#600
 	bl delay
-	bl readStopButton
-	cmp r0, #1
-	beq end
+
+	mov r0, #YEL_PIN
+	bl pinOff
+	ldr r0, =#600
+	bl delay
+
+	mov r0, #YEL_PIN
+	bl pinOn
+	ldr r0, =#200
+	bl delay
 
 	b do_while
 end:
-	b do_while
+	mov r0, #RED_PIN
+	bl pinOff
+	mov r0, #YEL_PIN
+	bl pinOff
+	mov r0, #GRE_PIN
+	bl pinOff
+	mov r0, #G_PIN
+	bl pinOff
+	mov r0, #R_PIN
+	bl pinOff
+
+	mov r0, #0
+	pop {PC}
 
 setPinInput:
 	push {LR}
