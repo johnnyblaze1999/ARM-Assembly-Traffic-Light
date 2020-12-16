@@ -11,6 +11,7 @@
 
 .equ STP_PIN, 29	// wiringPi 29 // STOP PIN
 .equ PAUSE_S, 5		// pause in seconds
+.equ BLINK, 1		// blink light
 
 .align 4
 .text
@@ -30,20 +31,42 @@ main:
 
 	mov r0, #GRE_PIN
 	bl setPinOutput
+
+	mov r0, #STA_PIN
+	bl setPinOutput
+
+	mov r0, #WAL_PIN
+	bl setPinOutput
 lp:
 	mov r0, #GRE_PIN	// pin going off
 	mov r1, #RED_PIN	// pin going on
 	mov r2, #PAUSE_S	// pause 5s and wait for input
+	//mov r3, #WAL_PIN	// walk
 	bl action
+	mov r0, #WAL_PIN
+	bl pinOn
 
 	cmp r0, #1
 	beq end_lp
 
 	mov r0, #RED_PIN
 	mov r1, #YEL_PIN
-	//ldr r2, =#2000		// delay(2000); // delay for 2000 milliseconds or 2 seconds
-	mov r2, #PAUSE_S
-	bl action
+	mov r2, #BLINK
+	bl action_blnk
+
+	cmp r0, #1
+	beq end_lp
+
+	mov r0, #YEL_PIN
+	mov r2, #BLINK
+	bl action_blnk
+
+	cmp r0, #1
+	beq end_lp
+
+	mov r1, #YEL_PIN
+	mov r2, #BLINK
+	bl action_blnk
 
 	cmp r0, #1
 	beq end_lp
@@ -57,6 +80,7 @@ lp:
 	beq end_lp
 
 	bal lp
+
 end_lp:
 	mov r0, #RED_PIN
 	bl pinOff
@@ -70,22 +94,23 @@ end_lp:
 	mov r0, #0	// return 0;
 	pop {PC}
 
-setPinInput:
+setPinInput:			// set pin as input // gpio mode
 	push {LR}
 	mov r1, #INPUT
 	bl pinMode
 	pop {PC}
-setPinOutput:
+
+setPinOutput:			// set pin as output // gpio mode
 	push {LR}
 	mov r1, #OUTPUT
 	bl pinMode
 	pop {PC}
-pinOn:
+pinOn:				// set pin on // gpio write
 	push {LR}
 	mov r1, #HIGH
 	bl digitalWrite
 	pop {PC}
-pinOff:
+pinOff:				// set pin off // gpio write
 	push {LR}
 	mov r1, #LOW
 	bl digitalWrite
@@ -108,7 +133,22 @@ action:
 
 	mov r0, #0
 	bl time
+
 	mov r4, r0
+
+action_blnk:
+	mov r4, r1
+	mov r5, r2
+
+	bl pinOff
+	mov r0, r4
+	bl pinOn
+
+	mov r0, #0
+	bl time
+
+	mov r4, r0
+
 do_whl:
 	bl readStopButton
 	cmp r0, #HIGH
